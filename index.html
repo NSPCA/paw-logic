@@ -3,54 +3,531 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Paw Logic</title>
+<title>Paw Logic | NSPCA Games</title>
 <style>
-:root{--blue:#1e73d8;--text:#222;--muted:#6b7280;--border:#d8d8d8;--panel:#f6f7f8;--error:#d64545;--success:#eaf7ed}
+:root{
+  --blue:#1769d2;
+  --blue-dark:#0f56af;
+  --ink:#222a35;
+  --muted:#6d7581;
+  --line:#dce4ee;
+  --paper:#fffdfb;
+  --cat:#555b64;
+  --pasture:#eaf4df;
+  --pasture-given:#dcebcf;
+  --pasture-border:#b8cfa8;
+}
 *{box-sizing:border-box}
-body{margin:0;padding:24px 14px;font-family:Arial,Helvetica,sans-serif;background:#fff;color:var(--text)}
-.wrap{max-width:620px;margin:0 auto}
-.top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
-h1{margin:0 0 4px;font-size:32px}.sub{margin:0;color:var(--muted)}
-.stats{display:flex;gap:8px}.stat{border:1px solid var(--border);border-radius:9px;padding:9px 12px;font-size:14px}.label{color:var(--muted);margin-right:5px}
-.rules{margin:20px 0 24px;padding:14px 16px;border:1px solid var(--border);border-radius:12px;background:var(--panel);display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;font-size:14px;line-height:1.4}
-.board{width:min(100%,430px);margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr) 18px) minmax(0,1fr);grid-template-rows:repeat(5,auto 18px) auto;align-items:center;justify-items:center;user-select:none}
-.cell{width:100%;aspect-ratio:1/1;border:1.5px solid var(--border);border-radius:12px;background:#fff;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.cell.given{background:#f1f1f1;border-width:2px;cursor:default}.cell.bad{outline:3px solid var(--error);outline-offset:-3px}.cell:active:not(:disabled){transform:scale(.97)}
-.rel{width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#666;font-size:13px}.piece{width:72%;height:72%}.cat{color:#444}.dog{color:var(--blue)}
-.msg{margin-top:22px;min-height:52px;border:1px solid var(--border);border-radius:12px;padding:14px 16px;font-size:14px;line-height:1.4}.msg.win{background:var(--success);border-color:#64a36f}
-.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:14px}.action{min-height:44px;padding:10px 18px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer}.secondary{background:#fff;border:1px solid #ccc}.primary{background:var(--blue);color:#fff;border:1px solid var(--blue)}
-@media(max-width:520px){.rules{grid-template-columns:1fr}.board{grid-template-columns:repeat(5,minmax(0,1fr) 13px) minmax(0,1fr);grid-template-rows:repeat(5,auto 13px) auto}.rel{width:13px;height:13px;font-size:11px}.cell{border-radius:9px}}
+body{
+  margin:0;
+  padding:20px 12px 30px;
+  background:#f5f8fc;
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color:var(--ink);
+}
+.game{max-width:700px;margin:auto}
+.hero{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(135deg,#f8fbff 0%,#fffdfa 63%,#f4f8ff 100%);
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:22px;
+  box-shadow:0 10px 26px rgba(31,61,107,.05);
+}
+.hero:after{
+  content:"";
+  position:absolute;
+  width:160px;
+  height:160px;
+  border-radius:50%;
+  right:-70px;
+  top:-82px;
+  background:rgba(23,105,210,.06);
+}
+.kicker{
+  position:relative;
+  z-index:1;
+  color:var(--blue);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+.headrow{
+  position:relative;
+  z-index:1;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:16px;
+}
+h1{
+  margin:0;
+  font-size:36px;
+  line-height:1;
+  letter-spacing:-.04em;
+}
+.subtitle{
+  margin:9px 0 0;
+  max-width:460px;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.45;
+}
+.rules-note{
+  display:inline-block;
+  margin-top:7px;
+  color:var(--blue);
+  font-size:12px;
+  font-weight:720;
+}
+.badge{
+  flex:none;
+  border:1px solid #cfe0f5;
+  border-radius:999px;
+  padding:7px 11px;
+  background:#fff;
+  color:var(--blue-dark);
+  font-size:12px;
+  font-weight:750;
+  white-space:nowrap;
+}
+.stats{
+  position:relative;
+  z-index:1;
+  display:flex;
+  gap:8px;
+  margin-top:17px;
+  transition:.35s ease;
+}
+.stat{
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:10px;
+  padding:8px 10px;
+  font-size:12px;
+  color:var(--muted);
+}
+.stat strong{color:var(--ink)}
+.shell{
+  margin-top:16px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:var(--paper);
+  padding:22px 16px 17px;
+  box-shadow:0 14px 30px rgba(30,56,89,.06);
+}
+.puzzle-stage{
+  position:relative;
+  min-height:430px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.board{
+  width:min(100%,430px);
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr) 18px) minmax(0,1fr);
+  grid-template-rows:repeat(5,auto 18px) auto;
+  align-items:center;
+  justify-items:center;
+  user-select:none;
+  transition:filter .45s ease,opacity .45s ease,transform .45s ease;
+}
+.cell{
+  position:relative;
+  overflow:visible;
+  width:100%;
+  aspect-ratio:1/1;
+  border:1.5px solid var(--pasture-border);
+  border-radius:16px;
+  background:linear-gradient(180deg,#f3f9ee 0%,var(--pasture) 100%);
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  box-shadow:0 2px 6px rgba(20,35,54,.03);
+  transition:transform .12s ease,border-color .15s ease,box-shadow .15s ease;
+}
+.cell:hover:not(:disabled){
+  border-color:#98b685;
+  box-shadow:0 5px 13px rgba(69,110,52,.08);
+}
+.cell:active:not(:disabled){transform:scale(.96)}
+.cell:focus-visible{
+  outline:3px solid rgba(23,105,210,.25);
+  outline-offset:2px;
+}
+.cell.given{
+  background:linear-gradient(180deg,#e6f1dc 0%,var(--pasture-given) 100%);
+  border:2px solid #9fba8d;
+  cursor:default;
+}
+.cell.hinted{
+  border:2px solid var(--blue);
+  animation:hintPulse 1.3s ease-in-out infinite;
+}
+@keyframes hintPulse{
+  0%,100%{box-shadow:0 0 0 3px rgba(23,105,210,.10),0 5px 14px rgba(23,105,210,.08)}
+  50%{box-shadow:0 0 0 6px rgba(23,105,210,.19),0 5px 17px rgba(23,105,210,.13)}
+}
+.cell.grass-left:after,.cell.grass-right:after{
+  content:"";
+  position:absolute;
+  bottom:-9px;
+  width:28px;
+  height:24px;
+  background-repeat:no-repeat;
+  background-size:contain;
+  background-position:center bottom;
+  pointer-events:none;
+  z-index:6;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 28'%3E%3Cpath d='M2 28C2 21 3 14 7 7C10 14 10 21 10 28Z' fill='%238AC53F'/%3E%3Cpath d='M7 28C7 17 10 8 15 1C18 11 18 20 17 28Z' fill='%2344B34B'/%3E%3Cpath d='M13 28C13 18 16 9 21 3C23 12 22 20 21 28Z' fill='%232E9637'/%3E%3Cpath d='M19 28C19 18 23 10 29 5C28 14 27 21 26 28Z' fill='%233BA346'/%3E%3Cpath d='M24 28C25 20 28 14 33 10C31 17 30 23 30 28Z' fill='%238CCB45'/%3E%3C/svg%3E");
+}
+.cell.grass-left:after{left:-9px}
+.cell.grass-right:after{right:-9px;transform:scaleX(-1)}
+.piece{
+  position:relative;
+  z-index:2;
+  width:78%;
+  height:78%;
+  overflow:visible;
+}
+.cat{color:var(--cat)}
+.relation{
+  width:18px;
+  height:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:850;
+  font-size:11px;
+  color:#617087;
+}
+.relation.active{
+  border-radius:999px;
+  background:#edf4fc;
+  border:1px solid #d7e6f7;
+  color:var(--blue);
+}
+.cage{
+  position:absolute;
+  inset:3px;
+  z-index:5;
+  border:3px solid #555e68;
+  border-radius:12px;
+  background:repeating-linear-gradient(90deg,transparent 0 9px,rgba(72,79,87,.92) 9px 12px);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);
+  transform:translateY(-125%);
+  animation:cageDrop .28s cubic-bezier(.2,.8,.2,1) forwards;
+  pointer-events:none;
+}
+.cage:before,.cage:after{
+  content:"";
+  position:absolute;
+  left:-2px;
+  right:-2px;
+  height:4px;
+  background:#555e68;
+  border-radius:4px;
+}
+.cage:before{top:27%}
+.cage:after{bottom:27%}
+@keyframes cageDrop{to{transform:translateY(0)}}
+.message{
+  margin:16px auto 0;
+  max-width:520px;
+  min-height:50px;
+  padding:11px 14px;
+  border-radius:11px;
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.45;
+  transition:.2s ease;
+}
+.message strong{color:var(--ink)}
+.message.cage-warning{
+  background:#f5f6f8;
+  border:1px solid #cdd2d8;
+  color:#474f58;
+  font-weight:650;
+}
+.message.hint-message{
+  background:#f3f8ff;
+  border:1px solid #c9ddf7;
+  color:#3f5875;
+}
+.message.hint-message strong{color:var(--blue-dark)}
+.buttons{
+  display:flex;
+  justify-content:center;
+  gap:9px;
+  margin-top:8px;
+  transition:.3s ease;
+}
+.control{
+  min-height:44px;
+  border-radius:11px;
+  padding:10px 18px;
+  font-size:13px;
+  font-weight:760;
+  cursor:pointer;
+  border:1px solid var(--line);
+  background:#fff;
+  color:#4d5865;
+}
+.hint-button{
+  color:var(--blue);
+  border:1.5px solid #bdd6f4;
+  background:#fafdff;
+}
+.howto{
+  margin-top:18px;
+  border:1px solid var(--line);
+  border-radius:17px;
+  background:#fff;
+  overflow:hidden;
+}
+.howto-btn{
+  width:100%;
+  padding:15px 17px;
+  border:0;
+  background:#fff;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:15px;
+  font-weight:800;
+  color:var(--ink);
+  cursor:pointer;
+  text-align:left;
+}
+.arrow{
+  font-size:21px;
+  color:#5e6875;
+  transition:transform .15s ease;
+}
+.howto.closed .arrow{transform:rotate(180deg)}
+.howto-body{
+  border-top:1px solid #edf1f6;
+  padding:14px 17px 4px;
+}
+.howto.closed .howto-body{display:none}
+.howto-list{
+  margin:0;
+  padding-left:25px;
+  color:#2e3540;
+  font-size:14px;
+  line-height:1.45;
+}
+.howto-list li{margin:0 0 15px}
+.mini{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:27px;
+  height:27px;
+  vertical-align:middle;
+  margin:0 2px;
+}
+.mini svg{width:100%;height:100%}
+.examples{
+  margin-top:8px;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+.example{
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+.yes{font-size:23px;color:#48a384}
+.no{font-size:23px;color:#cf6573}
+.end-frame{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:28px;
+  opacity:0;
+  transform:translateY(8px);
+  pointer-events:none;
+  transition:opacity .45s ease .22s,transform .45s ease .22s;
+}
+.end-frame h2{
+  margin:0 0 16px;
+  font-size:27px;
+  line-height:1.15;
+  letter-spacing:-.025em;
+}
+.end-frame p{
+  margin:0 0 22px;
+  font-size:18px;
+  line-height:1.4;
+  font-weight:650;
+  color:#2f3742;
+  max-width:380px;
+}
+.donate-btn{
+  display:inline-flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-width:min(100%,360px);
+  padding:14px 22px;
+  border-radius:13px;
+  background:var(--blue);
+  color:#fff;
+  text-decoration:none;
+  box-shadow:0 8px 18px rgba(23,105,210,.22);
+  font-weight:800;
+  line-height:1.2;
+}
+.donate-btn:hover{background:var(--blue-dark)}
+.donate-btn .small{
+  font-size:12px;
+  font-weight:650;
+  opacity:.9;
+  margin-bottom:3px;
+}
+.donate-btn .big{font-size:15px}
+.solved .board{
+  filter:blur(5px);
+  opacity:.24;
+  transform:scale(.985);
+}
+.solved .end-frame{
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
+}
+.solved .message,.solved .buttons{
+  opacity:0;
+  pointer-events:none;
+}
+.solved .stats{
+  opacity:0;
+  height:0;
+  margin:0;
+  overflow:hidden;
+}
+.footer{
+  text-align:center;
+  font-size:10.5px;
+  color:#9299a2;
+  margin-top:13px;
+}
+@media(max-width:540px){
+  body{padding:14px 8px 22px}
+  .hero{padding:18px 16px 15px}
+  .headrow{flex-direction:column;align-items:flex-start;gap:11px}
+  h1{font-size:30px}
+  .shell{padding:18px 9px 14px}
+  .puzzle-stage{min-height:350px}
+  .board{
+    grid-template-columns:repeat(5,minmax(0,1fr) 13px) minmax(0,1fr);
+    grid-template-rows:repeat(5,auto 13px) auto;
+  }
+  .relation{width:13px;height:13px;font-size:9px}
+  .cell{border-radius:12px}
+  .cell.grass-left:after,.cell.grass-right:after{width:22px;height:19px;bottom:-7px}
+  .cell.grass-left:after{left:-7px}
+  .cell.grass-right:after{right:-7px}
+  .end-frame{padding:20px}
+  .end-frame h2{font-size:23px}
+  .end-frame p{font-size:16px}
+  .donate-btn{min-width:88%}
+}
+@media(prefers-reduced-motion:reduce){
+  .cell,.board,.end-frame,.message,.buttons,.stats,.arrow{transition:none!important}
+  .cell.hinted{animation:none;box-shadow:0 0 0 4px rgba(23,105,210,.16)}
+  .cage{animation:none;transform:translateY(0)}
+}
 </style>
 </head>
 <body>
-<main class="wrap">
-  <div class="top">
-    <div><h1>Paw Logic</h1><p class="sub">Puzzle #01 · Place every cat and dog correctly.</p></div>
-    <div class="stats">
-      <div class="stat"><span class="label">Time</span><strong id="time">00:00</strong></div>
-      <div class="stat"><span class="label">Mistakes</span><strong id="mistakes">0</strong></div>
+<main class="game" id="game">
+  <section class="hero">
+    <div class="kicker">NSPCA Games</div>
+    <div class="headrow">
+      <div>
+        <h1>Paw Logic</h1>
+        <p class="subtitle">Use the clues to place every pet in the right pasture.</p>
+        <span class="rules-note">See the rules below ↓</span>
+      </div>
+      <div class="badge">Puzzle #01 · Easy</div>
     </div>
-  </div>
+    <div class="stats">
+      <div class="stat">Time <strong id="time">00:00</strong></div>
+    </div>
+  </section>
 
-  <div class="rules">
-    <div><strong>3 cats + 3 dogs</strong> in every row and column.</div>
-    <div>Never place <strong>3 of the same animal</strong> next to each other.</div>
-    <div><strong>=</strong> means neighbouring animals are the same.</div>
-    <div><strong>×</strong> means neighbouring animals are different.</div>
-  </div>
+  <section class="shell">
+    <div class="puzzle-stage">
+      <div id="board" class="board" aria-label="Paw Logic puzzle"></div>
 
-  <div id="board" class="board"></div>
-  <div id="msg" class="msg">Tap an empty square to cycle through <strong>cat → dog → empty</strong>.</div>
-  <div class="actions">
-    <button id="restart" class="action secondary" type="button">Restart puzzle</button>
-    <button id="check" class="action primary" type="button">Check puzzle</button>
-  </div>
+      <div class="end-frame" aria-live="polite">
+        <h2>Everyone’s where they belong. 🐾</h2>
+        <p>Every pet deserves a pasture, not a cage.</p>
+        <a
+          class="donate-btn"
+          href="https://nspca.co.za/adopt-a-project/relief-dogs-cats/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span class="small">Donate Monthly to the</span>
+          <span class="big">NSPCA Relief for Cats &amp; Dogs Project</span>
+        </a>
+      </div>
+    </div>
+
+    <div id="message" class="message" aria-live="polite">
+      Tap a pasture to cycle <strong>cat → dog → empty</strong>.
+    </div>
+
+    <div class="buttons">
+      <button id="hint" class="control hint-button" type="button">Hint</button>
+      <button id="restart" class="control" type="button">Restart</button>
+    </div>
+
+    <section class="howto" id="howto">
+      <button
+        class="howto-btn"
+        id="howtoBtn"
+        type="button"
+        aria-expanded="true"
+        aria-controls="howtoBody"
+      >
+        <span>How to play</span>
+        <span class="arrow">⌃</span>
+      </button>
+
+      <div class="howto-body" id="howtoBody">
+        <ul class="howto-list" id="howtoList"></ul>
+      </div>
+    </section>
+
+    <div class="footer">A little logic. A lot of paws.</div>
+  </section>
 </main>
 
 <script>
 (function(){
-  'use strict';
-  const N=6, EMPTY=0, CAT=1, DOG=2;
+  "use strict";
+
+  const N=6;
+  const EMPTY=0;
+  const CAT=1;
+  const DOG=2;
+
   const solution=[
     [CAT,DOG,CAT,DOG,CAT,DOG],
     [CAT,DOG,DOG,CAT,DOG,CAT],
@@ -59,127 +536,363 @@ h1{margin:0 0 4px;font-size:32px}.sub{margin:0;color:var(--muted)}
     [DOG,CAT,DOG,DOG,CAT,CAT],
     [DOG,CAT,DOG,CAT,DOG,CAT]
   ];
-  const givens=[[0,0,CAT],[0,5,DOG],[1,2,DOG],[2,1,CAT],[3,4,DOG],[4,0,DOG],[4,5,CAT],[5,3,CAT]];
-  const relations=[
-    {r1:0,c1:0,r2:1,c2:0,type:'='},
-    {r1:1,c1:1,r2:1,c2:2,type:'='},
-    {r1:1,c1:3,r2:1,c2:4,type:'×'},
-    {r1:2,c1:2,r2:3,c2:2,type:'='},
-    {r1:3,c1:4,r2:3,c2:5,type:'='},
-    {r1:4,c1:2,r2:4,c2:3,type:'='}
+
+  const givens=[
+    [0,0,CAT],
+    [0,5,DOG],
+    [1,2,DOG],
+    [2,1,CAT],
+    [3,4,DOG],
+    [4,0,DOG],
+    [4,5,CAT],
+    [5,1,CAT],
+    [5,3,CAT]
   ];
 
-  const boardEl=document.getElementById('board');
-  const timeEl=document.getElementById('time');
-  const mistakesEl=document.getElementById('mistakes');
-  const msgEl=document.getElementById('msg');
-  const restartBtn=document.getElementById('restart');
-  const checkBtn=document.getElementById('check');
+  const relations=[
+    {r1:0,c1:0,r2:1,c2:0,type:"="},
+    {r1:1,c1:1,r2:1,c2:2,type:"="},
+    {r1:1,c1:3,r2:1,c2:4,type:"×"},
+    {r1:2,c1:2,r2:3,c2:2,type:"="},
+    {r1:3,c1:4,r2:3,c2:5,type:"="},
+    {r1:4,c1:2,r2:4,c2:3,type:"="}
+  ];
 
-  let board=[], fixed=new Set(), mistakes=0, seconds=0, timer=null, started=false, solved=false;
-  const k=(r,c)=>r+'-'+c;
+  const catHints=[
+    "These pets are naturally most active around dawn and dusk.",
+    "These pets use sensitive whiskers to help judge nearby spaces.",
+    "These pets can rotate their ears independently to help locate sounds."
+  ];
+
+  const dogHints=[
+    "These pets have an extraordinary sense of smell.",
+    "These pets are especially good at following human gestures such as pointing.",
+    "These pets can learn to recognise many spoken words and signals."
+  ];
+
+  const game=document.getElementById("game");
+  const boardEl=document.getElementById("board");
+  const timeEl=document.getElementById("time");
+  const msgEl=document.getElementById("message");
+  const hintBtn=document.getElementById("hint");
+  const restartBtn=document.getElementById("restart");
+  const howto=document.getElementById("howto");
+  const howtoBtn=document.getElementById("howtoBtn");
+  const howtoList=document.getElementById("howtoList");
+
+  let board=[];
+  let fixed=new Set();
+  let caged=new Set();
+  let errorTimers=new Map();
+  let seconds=0;
+  let timer=null;
+  let started=false;
+  let solved=false;
+  let hintTarget=null;
+
+  const key=(r,c)=>r+"-"+c;
+
+  function grassClass(r,c){
+    const n=r*N+c;
+    if(n%5===0) return " grass-left";
+    if(n%5===2) return " grass-right";
+    return "";
+  }
 
   function catSVG(){
-    return '<svg class="piece cat" viewBox="0 0 64 64" aria-hidden="true"><path fill="currentColor" d="M14 25 12 8l14 9a27 27 0 0 1 12 0l14-9-2 17c4 5 6 11 6 18 0 10-10 17-24 17S8 53 8 43c0-7 2-13 6-18Z"/><circle cx="24" cy="36" r="3" fill="white"/><circle cx="40" cy="36" r="3" fill="white"/><circle cx="24" cy="36" r="1.2" fill="#222"/><circle cx="40" cy="36" r="1.2" fill="#222"/><path d="M29 44h6l-3 4-3-4Z" fill="white"/></svg>';
+    return '<svg class="piece cat" viewBox="0 0 64 64" aria-hidden="true"><path fill="currentColor" d="M13 27 11 9l14 9c2.2-.8 4.5-1.2 7-1.2s4.8.4 7 1.2l14-9-2 18c4 4.2 6 9.5 6 15.3C57 53 47.1 60 32 60S7 53 7 42.3C7 36.5 9 31.2 13 27Z"/><path d="M20.5 34.5c2.7-2 5.8-2 8.5 0M35 34.5c2.7-2 5.8-2 8.5 0" stroke="#fff" stroke-width="2.7" stroke-linecap="round" fill="none"/><path d="M28.7 42.3h6.6L32 46l-3.3-3.7Z" fill="#fff"/></svg>';
   }
 
   function dogSVG(){
-    return '<svg class="piece dog" viewBox="0 0 64 64" aria-hidden="true"><path fill="currentColor" d="M18 20c3-7 8-10 14-10s11 3 14 10c5-4 10-6 14-4 0 9-3 16-8 21v8c0 11-8 18-20 18s-20-7-20-18v-8C7 32 4 25 4 16c4-2 9 0 14 4Z"/><path fill="currentColor" d="M18 20C12 15 7 14 4 16c0 9 3 16 9 21l7-6-2-11ZM46 20c6-5 11-6 14-4 0 9-3 16-9 21l-7-6 2-11Z"/><circle cx="24" cy="34" r="3.2" fill="white"/><circle cx="40" cy="34" r="3.2" fill="white"/><circle cx="24" cy="34" r="1.3" fill="#222"/><circle cx="40" cy="34" r="1.3" fill="#222"/><ellipse cx="32" cy="45" rx="9" ry="7" fill="white"/><ellipse cx="32" cy="42.5" rx="3.8" ry="3" fill="#222"/><path d="M32 45v2M27.5 48c1.8 2.6 7.2 2.6 9 0" stroke="#222" stroke-width="1.7" stroke-linecap="round" fill="none"/></svg>';
+    return '<svg class="piece" viewBox="0 0 64 64" aria-hidden="true"><path d="M16 16C10 13 5 16 4 23C3 30 4 38 6 42C7 45 10 47 13 44C17 40 20 34 21 26C22 20 20 17 16 16Z" fill="#7b430f"/><path d="M48 16C54 13 59 16 60 23C61 30 60 38 58 42C57 45 54 47 51 44C47 40 44 34 43 26C42 20 44 17 48 16Z" fill="#7b430f"/><path d="M12 27C12 15 21 9 32 9C43 9 52 15 52 27L52 46C52 54 45 60 36 60L28 60C19 60 12 54 12 46Z" fill="#edd0bb"/><path d="M12 27C12 16 19 10 28 9C29 15 30 20 30 27C30 33 30 38 29 44C27 45 24 45 21 45C15 45 12 40 12 27Z" fill="#8b531b"/><path d="M52 27C52 16 45 10 36 9C35 15 34 20 34 27C34 33 34 38 35 44C37 45 40 45 43 45C49 45 52 40 52 27Z" fill="#8b531b"/><circle cx="22" cy="31" r="2.8" fill="#3b0006"/><circle cx="42" cy="31" r="2.8" fill="#3b0006"/><path d="M29.6 40.1C29.6 38.6 30.8 37.5 32 37.5C33.2 37.5 34.4 38.6 34.4 40.1C34.4 41.3 33.7 42 32.8 42.8C32.4 43.1 32.2 43.3 32 43.3C31.8 43.3 31.6 43.1 31.2 42.8C30.3 42 29.6 41.3 29.6 40.1Z" fill="#54220b"/><path d="M32 43.4V46.2" stroke="#54220b" stroke-width="1.2" stroke-linecap="round"/><path d="M32 46.2C31.4 48.1 29.8 49 28.1 48.6" stroke="#54220b" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M32 46.2C32.6 48.1 34.2 49 35.9 48.6" stroke="#54220b" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>';
   }
 
-  function icon(v){return v===CAT?catSVG():v===DOG?dogSVG():'';}
-  function name(v){return v===CAT?'cat':v===DOG?'dog':'empty';}
+  function icon(v){
+    return v===CAT ? catSVG() : v===DOG ? dogSVG() : "";
+  }
+
+  function mini(v){
+    return '<span class="mini">'+icon(v)+"</span>";
+  }
+
+  function petName(v){
+    return v===CAT ? "cat" : v===DOG ? "dog" : "empty";
+  }
+
+  howtoList.innerHTML=
+    "<li>Fill the grid so that each pasture contains either a "+mini(CAT)+" or a "+mini(DOG)+".</li>"+
+    "<li>No more than 2 "+mini(CAT)+" or "+mini(DOG)+" may be next to each other, either vertically or horizontally."+
+      '<div class="examples">'+
+        '<div class="example">'+mini(CAT)+mini(CAT)+'<span class="yes">✓</span></div>'+
+        '<div class="example">'+mini(CAT)+mini(CAT)+mini(CAT)+'<span class="no">✕</span></div>'+
+      "</div>"+
+    "</li>"+
+    "<li>Each row and column must contain the same number of "+mini(CAT)+" and "+mini(DOG)+".</li>"+
+    "<li>Pastures separated by an <strong>=</strong> sign must contain the same pet.</li>"+
+    "<li>Pastures separated by a <strong>×</strong> sign must contain different pets.</li>"+
+    "<li>Each puzzle has one correct answer and can be solved through deduction — you should never need to guess.</li>";
+
+  function clearErrorTimers(){
+    errorTimers.forEach(function(id){ clearTimeout(id); });
+    errorTimers.clear();
+  }
+
+  function neutralMessage(){
+    if(caged.size){
+      msgEl.className="message cage-warning";
+      msgEl.innerHTML="<strong>Oops — wrong pet.</strong> That choice puts this pet behind bars. Try again.";
+    }else if(!hintTarget){
+      msgEl.className="message";
+      msgEl.innerHTML="Tap a pasture to cycle <strong>cat → dog → empty</strong>.";
+    }
+  }
 
   function init(){
-    clearInterval(timer); timer=null; started=false; solved=false; seconds=0; mistakes=0;
-    board=Array.from({length:N},()=>Array(N).fill(EMPTY)); fixed=new Set();
-    givens.forEach(([r,c,v])=>{board[r][c]=v; fixed.add(k(r,c));});
-    timeEl.textContent='00:00'; mistakesEl.textContent='0'; msgEl.className='msg';
-    msgEl.innerHTML='Tap an empty square to cycle through <strong>cat → dog → empty</strong>.';
+    clearInterval(timer);
+    clearErrorTimers();
+
+    timer=null;
+    started=false;
+    solved=false;
+    seconds=0;
+    caged=new Set();
+    hintTarget=null;
+
+    board=Array.from({length:N},function(){ return Array(N).fill(EMPTY); });
+    fixed=new Set();
+
+    givens.forEach(function(g){
+      const r=g[0],c=g[1],v=g[2];
+      board[r][c]=v;
+      fixed.add(key(r,c));
+    });
+
+    timeEl.textContent="00:00";
+    game.classList.remove("solved");
     render();
+    neutralMessage();
   }
 
-  function startTimer(){
-    if(started) return; started=true;
-    timer=setInterval(()=>{seconds++; const m=String(Math.floor(seconds/60)).padStart(2,'0'); const s=String(seconds%60).padStart(2,'0'); timeEl.textContent=m+':'+s;},1000);
+  function start(){
+    if(started) return;
+    started=true;
+
+    timer=setInterval(function(){
+      seconds++;
+      timeEl.textContent=
+        String(Math.floor(seconds/60)).padStart(2,"0")+":"+
+        String(seconds%60).padStart(2,"0");
+    },1000);
   }
 
   function relationAt(r,c,vertical){
-    return relations.find(x=>vertical ? (x.c1===c && x.c2===c && Math.min(x.r1,x.r2)===r && Math.max(x.r1,x.r2)===r+1) : (x.r1===r && x.r2===r && Math.min(x.c1,x.c2)===c && Math.max(x.c1,x.c2)===c+1));
+    return relations.find(function(x){
+      if(vertical){
+        return x.c1===c &&
+          x.c2===c &&
+          Math.min(x.r1,x.r2)===r &&
+          Math.max(x.r1,x.r2)===r+1;
+      }
+
+      return x.r1===r &&
+        x.r2===r &&
+        Math.min(x.c1,x.c2)===c &&
+        Math.max(x.c1,x.c2)===c+1;
+    });
+  }
+
+  function pruneCages(){
+    Array.from(caged).forEach(function(k){
+      const parts=k.split("-").map(Number);
+      const r=parts[0],c=parts[1];
+
+      if(board[r][c]===EMPTY || board[r][c]===solution[r][c]){
+        caged.delete(k);
+      }
+    });
   }
 
   function render(){
-    boardEl.innerHTML='';
+    pruneCages();
+    boardEl.innerHTML="";
+
     for(let gr=0;gr<11;gr++){
       for(let gc=0;gc<11;gc++){
-        const rowCell=gr%2===0, colCell=gc%2===0;
-        if(rowCell && colCell){
-          const r=gr/2,c=gc/2,b=document.createElement('button');
-          b.type='button'; b.className='cell'+(fixed.has(k(r,c))?' given':''); b.dataset.r=r; b.dataset.c=c; b.innerHTML=icon(board[r][c]);
-          b.setAttribute('aria-label','Row '+(r+1)+', column '+(c+1)+': '+name(board[r][c]));
-          if(fixed.has(k(r,c))) b.disabled=true; else b.addEventListener('click',()=>cycle(r,c));
-          boardEl.appendChild(b);
-        }else if(rowCell && !colCell){
-          const r=gr/2,c=(gc-1)/2,d=document.createElement('div'),rel=relationAt(r,c,false); d.className='rel'; d.textContent=rel?rel.type:''; boardEl.appendChild(d);
-        }else if(!rowCell && colCell){
-          const r=(gr-1)/2,c=gc/2,d=document.createElement('div'),rel=relationAt(r,c,true); d.className='rel'; d.textContent=rel?rel.type:''; boardEl.appendChild(d);
-        }else boardEl.appendChild(document.createElement('div'));
+        const cellRow=gr%2===0;
+        const cellCol=gc%2===0;
+
+        if(cellRow && cellCol){
+          const r=gr/2;
+          const c=gc/2;
+          const k=key(r,c);
+          const button=document.createElement("button");
+
+          button.type="button";
+          button.className=
+            "cell"+
+            (fixed.has(k) ? " given" : "")+
+            grassClass(r,c)+
+            (hintTarget===k ? " hinted" : "");
+
+          button.innerHTML=
+            icon(board[r][c])+
+            (caged.has(k) ? '<span class="cage" aria-hidden="true"></span>' : "");
+
+          button.setAttribute(
+            "aria-label",
+            "Row "+(r+1)+", column "+(c+1)+": "+petName(board[r][c])
+          );
+
+          if(fixed.has(k)){
+            button.disabled=true;
+          }else{
+            button.addEventListener("click",function(){ cycle(r,c); });
+          }
+
+          boardEl.appendChild(button);
+        }else if(cellRow && !cellCol){
+          const r=gr/2;
+          const c=(gc-1)/2;
+          const el=document.createElement("div");
+          const rel=relationAt(r,c,false);
+
+          el.className="relation"+(rel ? " active" : "");
+          el.textContent=rel ? rel.type : "";
+          boardEl.appendChild(el);
+        }else if(!cellRow && cellCol){
+          const r=(gr-1)/2;
+          const c=gc/2;
+          const el=document.createElement("div");
+          const rel=relationAt(r,c,true);
+
+          el.className="relation"+(rel ? " active" : "");
+          el.textContent=rel ? rel.type : "";
+          boardEl.appendChild(el);
+        }else{
+          boardEl.appendChild(document.createElement("div"));
+        }
       }
     }
-    markBad(false);
   }
 
-  function hasThree(a){for(let i=0;i<a.length-2;i++) if(a[i]!==EMPTY && a[i]===a[i+1] && a[i]===a[i+2]) return true; return false;}
+  function giveHint(){
+    if(solved) return;
 
-  function badCells(){
-    const bad=new Set();
+    const emptyCandidates=[];
+    const wrongCandidates=[];
+
     for(let r=0;r<N;r++){
-      const row=board[r], cats=row.filter(v=>v===CAT).length, dogs=row.filter(v=>v===DOG).length;
-      if(cats>3||dogs>3||hasThree(row)) for(let c=0;c<N;c++) bad.add(k(r,c));
-    }
-    for(let c=0;c<N;c++){
-      const col=board.map(row=>row[c]), cats=col.filter(v=>v===CAT).length, dogs=col.filter(v=>v===DOG).length;
-      if(cats>3||dogs>3||hasThree(col)) for(let r=0;r<N;r++) bad.add(k(r,c));
-    }
-    relations.forEach(x=>{
-      const a=board[x.r1][x.c1],b=board[x.r2][x.c2]; if(a===EMPTY||b===EMPTY) return;
-      const wrong=x.type==='='?a!==b:a===b; if(wrong){bad.add(k(x.r1,x.c1));bad.add(k(x.r2,x.c2));}
-    });
-    return bad;
-  }
+      for(let c=0;c<N;c++){
+        const k=key(r,c);
+        if(fixed.has(k)) continue;
 
-  function markBad(show){
-    const bad=badCells();
-    boardEl.querySelectorAll('.cell').forEach(el=>el.classList.toggle('bad',bad.has(k(Number(el.dataset.r),Number(el.dataset.c)))));
-    if(show && bad.size) msgEl.textContent='Something conflicts with the rules. Have another look at the highlighted area.';
-    return bad;
+        if(board[r][c]===EMPTY){
+          emptyCandidates.push({r:r,c:c,pet:solution[r][c]});
+        }else if(board[r][c]!==solution[r][c]){
+          wrongCandidates.push({r:r,c:c,pet:solution[r][c]});
+        }
+      }
+    }
+
+    const pool=emptyCandidates.length ? emptyCandidates : wrongCandidates;
+    if(!pool.length) return;
+
+    const target=pool[Math.floor(Math.random()*pool.length)];
+    hintTarget=key(target.r,target.c);
+
+    const facts=target.pet===CAT ? catHints : dogHints;
+    const fact=facts[Math.floor(Math.random()*facts.length)];
+
+    render();
+
+    msgEl.className="message hint-message";
+    msgEl.innerHTML=
+      "<strong>Hint:</strong> "+fact+
+      "<br>Which pet belongs in the highlighted pasture?";
   }
 
   function cycle(r,c){
-    if(solved) return; startTimer();
-    board[r][c]=board[r][c]===EMPTY?CAT:board[r][c]===CAT?DOG:EMPTY;
+    if(solved) return;
+
+    start();
+
+    const k=key(r,c);
+    const existingTimer=errorTimers.get(k);
+
+    if(existingTimer){
+      clearTimeout(existingTimer);
+      errorTimers.delete(k);
+    }
+
+    caged.delete(k);
+
+    board[r][c]=
+      board[r][c]===EMPTY ? CAT :
+      board[r][c]===CAT ? DOG :
+      EMPTY;
+
+    if(hintTarget===k && board[r][c]===solution[r][c]){
+      hintTarget=null;
+    }
+
     render();
-    if(board[r][c]!==EMPTY && board[r][c]!==solution[r][c]){mistakes++; mistakesEl.textContent=String(mistakes);}
-    if(isSolved()) finish();
+    neutralMessage();
+
+    if(done()){
+      finish();
+      return;
+    }
+
+    if(board[r][c]!==EMPTY && board[r][c]!==solution[r][c]){
+      const id=setTimeout(function(){
+        errorTimers.delete(k);
+
+        if(
+          !solved &&
+          board[r][c]!==EMPTY &&
+          board[r][c]!==solution[r][c]
+        ){
+          caged.add(k);
+          render();
+          msgEl.className="message cage-warning";
+          msgEl.innerHTML="<strong>Oops — wrong pet.</strong> That choice puts this pet behind bars. Try again.";
+        }
+      },700);
+
+      errorTimers.set(k,id);
+    }
   }
 
-  function isSolved(){
-    for(let r=0;r<N;r++) for(let c=0;c<N;c++) if(board[r][c]!==solution[r][c]) return false;
+  function done(){
+    for(let r=0;r<N;r++){
+      for(let c=0;c<N;c++){
+        if(board[r][c]!==solution[r][c]) return false;
+      }
+    }
     return true;
   }
 
   function finish(){
-    solved=true; clearInterval(timer); msgEl.className='msg win';
-    msgEl.innerHTML='<strong>You solved it! 🐾</strong> Puzzle #01 completed in '+timeEl.textContent+' with '+mistakes+' mistake'+(mistakes===1?'':'s')+'.';
-    boardEl.querySelectorAll('.cell:not(.given)').forEach(b=>b.disabled=true);
+    solved=true;
+    hintTarget=null;
+
+    clearInterval(timer);
+    clearErrorTimers();
+
+    caged.clear();
+    render();
+
+    setTimeout(function(){
+      game.classList.add("solved");
+    },70);
   }
 
-  restartBtn.addEventListener('click',init);
-  checkBtn.addEventListener('click',()=>{
-    if(solved) return;
-    const bad=markBad(true), empties=board.flat().filter(v=>v===EMPTY).length;
-    if(isSolved()) finish();
-    else if(!bad.size) msgEl.innerHTML='No rule conflicts so far. <strong>'+empties+'</strong> square'+(empties===1?'':'s')+' still to place.';
+  hintBtn.addEventListener("click",giveHint);
+  restartBtn.addEventListener("click",init);
+
+  howtoBtn.addEventListener("click",function(){
+    const closed=howto.classList.toggle("closed");
+    howtoBtn.setAttribute("aria-expanded",String(!closed));
   });
 
   init();
