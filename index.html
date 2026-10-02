@@ -238,7 +238,7 @@ h1{
 .cage:after{bottom:27%}
 @keyframes cageDrop{to{transform:translateY(0)}}
 .message{
-  margin:16px auto 0;
+  margin:0 auto 12px;
   max-width:520px;
   min-height:50px;
   padding:11px 14px;
@@ -471,6 +471,10 @@ h1{
   </section>
 
   <section class="shell">
+    <div id="message" class="message" aria-live="polite">
+      <strong>Click a pasture:</strong> 1st click = cat · 2nd click = dog · 3rd click = empty.
+    </div>
+
     <div class="puzzle-stage">
       <div id="board" class="board" aria-label="Paw Logic puzzle"></div>
 
@@ -487,10 +491,6 @@ h1{
           <span class="big">NSPCA Relief for Cats &amp; Dogs Project</span>
         </a>
       </div>
-    </div>
-
-    <div id="message" class="message" aria-live="polite">
-      Tap a pasture to cycle <strong>cat → dog → empty</strong>.
     </div>
 
     <div class="buttons">
@@ -620,7 +620,7 @@ h1{
   }
 
   howtoList.innerHTML=
-    "<li>Fill the grid so that each pasture contains either a "+mini(CAT)+" or a "+mini(DOG)+".</li>"+
+    "<li>Click each pasture to choose a pet: first click for a "+mini(CAT)+", second click for a "+mini(DOG)+", and third click to clear the pasture.</li>"+
     "<li>No more than 2 "+mini(CAT)+" or "+mini(DOG)+" may be next to each other, either vertically or horizontally."+
       '<div class="examples">'+
         '<div class="example">'+mini(CAT)+mini(CAT)+'<span class="yes">✓</span></div>'+
@@ -643,7 +643,7 @@ h1{
       msgEl.innerHTML="<strong>Oops — wrong pet.</strong> That choice puts this pet behind bars. Try again.";
     }else if(!hintTarget){
       msgEl.className="message";
-      msgEl.innerHTML="Tap a pasture to cycle <strong>cat → dog → empty</strong>.";
+      msgEl.innerHTML="<strong>Click a pasture:</strong> 1st click = cat · 2nd click = dog · 3rd click = empty.";
     }
   }
 
