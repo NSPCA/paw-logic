@@ -253,14 +253,11 @@ h1{
   margin:0 auto 14px;
 }
 .feedback-message{
-  margin:18px auto 16px;
-  min-height:50px;
-  opacity:0;
-  pointer-events:none;
+  display:none;
+  margin:12px auto 0;
 }
 .feedback-message.show{
-  opacity:1;
-  pointer-events:auto;
+  display:block;
 }
 .message.cage-warning{
   background:#f5f6f8;
@@ -278,7 +275,7 @@ h1{
   display:flex;
   justify-content:center;
   gap:9px;
-  margin-top:0;
+  margin-top:16px;
   transition:.3s ease;
 }
 .control{
@@ -457,6 +454,7 @@ h1{
   .end-frame h2{font-size:23px}
   .end-frame p{font-size:16px}
   .donate-btn{min-width:88%}
+  .buttons{margin-top:14px}
 }
 @media(prefers-reduced-motion:reduce){
   .cell,.board,.end-frame,.message,.buttons,.stats,.arrow{transition:none!important}
@@ -505,12 +503,12 @@ h1{
       </div>
     </div>
 
-    <div id="feedback" class="message feedback-message" aria-live="polite"></div>
-
     <div class="buttons">
       <button id="hint" class="control hint-button" type="button">Hint</button>
       <button id="restart" class="control" type="button">Restart</button>
     </div>
+
+    <div id="feedback" class="message feedback-message" aria-live="polite"></div>
 
     <section class="howto" id="howto">
       <button
