@@ -726,12 +726,36 @@ h1{
     });
   }
 
+  function hasThreeAt(line,index){
+    for(let start=Math.max(0,index-2);start<=Math.min(index,line.length-3);start++){
+      if(line[start]!==EMPTY && line[start]===line[start+1] && line[start]===line[start+2]) return true;
+    }
+    return false;
+  }
+
+  function breaksVisibleRule(r,c){
+    const value=board[r][c];
+    if(value===EMPTY) return false;
+    const row=board[r];
+    const column=board.map(function(line){return line[c];});
+    if(row.filter(function(v){return v===value;}).length>3) return true;
+    if(column.filter(function(v){return v===value;}).length>3) return true;
+    if(hasThreeAt(row,c) || hasThreeAt(column,r)) return true;
+    for(const rel of relations){
+      if(!((rel.r1===r&&rel.c1===c)||(rel.r2===r&&rel.c2===c))) continue;
+      const a=board[rel.r1][rel.c1], b=board[rel.r2][rel.c2];
+      if(a===EMPTY || b===EMPTY) continue;
+      if(rel.type==="=" ? a!==b : a===b) return true;
+    }
+    return false;
+  }
+
   function pruneCages(){
     Array.from(caged).forEach(function(k){
       const parts=k.split("-").map(Number);
       const r=parts[0],c=parts[1];
 
-      if(board[r][c]===EMPTY || board[r][c]===solution[r][c]){
+      if(!breaksVisibleRule(r,c)){
         caged.delete(k);
       }
     });
@@ -868,14 +892,13 @@ h1{
       return;
     }
 
-    if(board[r][c]!==EMPTY && board[r][c]!==solution[r][c]){
+    if(breaksVisibleRule(r,c)){
       const id=setTimeout(function(){
         errorTimers.delete(k);
 
         if(
           !solved &&
-          board[r][c]!==EMPTY &&
-          board[r][c]!==solution[r][c]
+          breaksVisibleRule(r,c)
         ){
           caged.add(k);
           render();
