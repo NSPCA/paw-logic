@@ -238,7 +238,6 @@ h1{
 .cage:after{bottom:27%}
 @keyframes cageDrop{to{transform:translateY(0)}}
 .message{
-  margin:0 auto 12px;
   max-width:520px;
   min-height:50px;
   padding:11px 14px;
@@ -250,6 +249,19 @@ h1{
   transition:.2s ease;
 }
 .message strong{color:var(--ink)}
+.instruction-message{
+  margin:0 auto 14px;
+}
+.feedback-message{
+  margin:18px auto 16px;
+  min-height:50px;
+  opacity:0;
+  pointer-events:none;
+}
+.feedback-message.show{
+  opacity:1;
+  pointer-events:auto;
+}
 .message.cage-warning{
   background:#f5f6f8;
   border:1px solid #cdd2d8;
@@ -266,7 +278,7 @@ h1{
   display:flex;
   justify-content:center;
   gap:9px;
-  margin-top:8px;
+  margin-top:0;
   transition:.3s ease;
 }
 .control{
@@ -471,7 +483,7 @@ h1{
   </section>
 
   <section class="shell">
-    <div id="message" class="message" aria-live="polite">
+    <div class="message instruction-message">
       <strong>Click a pasture:</strong> 1st click = cat · 2nd click = dog · 3rd click = empty.
     </div>
 
@@ -492,6 +504,8 @@ h1{
         </a>
       </div>
     </div>
+
+    <div id="feedback" class="message feedback-message" aria-live="polite"></div>
 
     <div class="buttons">
       <button id="hint" class="control hint-button" type="button">Hint</button>
@@ -573,7 +587,7 @@ h1{
   const game=document.getElementById("game");
   const boardEl=document.getElementById("board");
   const timeEl=document.getElementById("time");
-  const msgEl=document.getElementById("message");
+  const feedbackEl=document.getElementById("feedback");
   const hintBtn=document.getElementById("hint");
   const restartBtn=document.getElementById("restart");
   const howto=document.getElementById("howto");
@@ -637,13 +651,26 @@ h1{
     errorTimers.clear();
   }
 
-  function neutralMessage(){
+  function clearFeedback(){
+    feedbackEl.className="message feedback-message";
+    feedbackEl.innerHTML="";
+  }
+
+  function showCageWarning(){
+    feedbackEl.className="message feedback-message cage-warning show";
+    feedbackEl.innerHTML="<strong>Oops — wrong pet.</strong> That choice puts this pet behind bars. Try again.";
+  }
+
+  function showHintMessage(text){
+    feedbackEl.className="message feedback-message hint-message show";
+    feedbackEl.innerHTML=text;
+  }
+
+  function neutralFeedback(){
     if(caged.size){
-      msgEl.className="message cage-warning";
-      msgEl.innerHTML="<strong>Oops — wrong pet.</strong> That choice puts this pet behind bars. Try again.";
+      showCageWarning();
     }else if(!hintTarget){
-      msgEl.className="message";
-      msgEl.innerHTML="<strong>Click a pasture:</strong> 1st click = cat · 2nd click = dog · 3rd click = empty.";
+      clearFeedback();
     }
   }
 
@@ -670,7 +697,7 @@ h1{
     timeEl.textContent="00:00";
     game.classList.remove("solved");
     render();
-    neutralMessage();
+    clearFeedback();
   }
 
   function start(){
@@ -805,10 +832,10 @@ h1{
 
     render();
 
-    msgEl.className="message hint-message";
-    msgEl.innerHTML=
+    showHintMessage(
       "<strong>Hint:</strong> "+fact+
-      "<br>Which pet belongs in the highlighted pasture?";
+      "<br>Which pet belongs in the highlighted pasture?"
+    );
   }
 
   function cycle(r,c){
@@ -836,7 +863,7 @@ h1{
     }
 
     render();
-    neutralMessage();
+    neutralFeedback();
 
     if(done()){
       finish();
@@ -854,8 +881,7 @@ h1{
         ){
           caged.add(k);
           render();
-          msgEl.className="message cage-warning";
-          msgEl.innerHTML="<strong>Oops — wrong pet.</strong> That choice puts this pet behind bars. Try again.";
+          showCageWarning();
         }
       },700);
 
