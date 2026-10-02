@@ -726,36 +726,94 @@ h1{
     });
   }
 
-  function hasThreeAt(line,index){
-    for(let start=Math.max(0,index-2);start<=Math.min(index,line.length-3);start++){
-      if(line[start]!==EMPTY && line[start]===line[start+1] && line[start]===line[start+2]) return true;
-    }
-    return false;
-  }
+  function visibleRuleCulprits(){
+    const involved=new Set();
 
-  function breaksVisibleRule(r,c){
-    const value=board[r][c];
-    if(value===EMPTY) return false;
-    const row=board[r];
-    const column=board.map(function(line){return line[c];});
-    if(row.filter(function(v){return v===value;}).length>3) return true;
-    if(column.filter(function(v){return v===value;}).length>3) return true;
-    if(hasThreeAt(row,c) || hasThreeAt(column,r)) return true;
-    for(const rel of relations){
-      if(!((rel.r1===r&&rel.c1===c)||(rel.r2===r&&rel.c2===c))) continue;
-      const a=board[rel.r1][rel.c1], b=board[rel.r2][rel.c2];
-      if(a===EMPTY || b===EMPTY) continue;
-      if(rel.type==="=" ? a!==b : a===b) return true;
+    function addIfWrong(r,c){
+      const k=key(r,c);
+      if(
+        !fixed.has(k) &&
+        board[r][c]!==EMPTY &&
+        board[r][c]!==solution[r][c]
+      ){
+        involved.add(k);
+      }
     }
-    return false;
+
+    for(let r=0;r<N;r++){
+      const row=board[r];
+
+      for(const pet of [CAT,DOG]){
+        const positions=[];
+        for(let c=0;c<N;c++){
+          if(row[c]===pet) positions.push(c);
+        }
+        if(positions.length>3){
+          positions.forEach(function(c){ addIfWrong(r,c); });
+        }
+      }
+
+      for(let c=0;c<=N-3;c++){
+        if(
+          row[c]!==EMPTY &&
+          row[c]===row[c+1] &&
+          row[c]===row[c+2]
+        ){
+          addIfWrong(r,c);
+          addIfWrong(r,c+1);
+          addIfWrong(r,c+2);
+        }
+      }
+    }
+
+    for(let c=0;c<N;c++){
+      const column=board.map(function(row){ return row[c]; });
+
+      for(const pet of [CAT,DOG]){
+        const positions=[];
+        for(let r=0;r<N;r++){
+          if(column[r]===pet) positions.push(r);
+        }
+        if(positions.length>3){
+          positions.forEach(function(r){ addIfWrong(r,c); });
+        }
+      }
+
+      for(let r=0;r<=N-3;r++){
+        if(
+          column[r]!==EMPTY &&
+          column[r]===column[r+1] &&
+          column[r]===column[r+2]
+        ){
+          addIfWrong(r,c);
+          addIfWrong(r+1,c);
+          addIfWrong(r+2,c);
+        }
+      }
+    }
+
+    relations.forEach(function(rel){
+      const a=board[rel.r1][rel.c1];
+      const b=board[rel.r2][rel.c2];
+
+      if(a===EMPTY || b===EMPTY) return;
+
+      const broken=rel.type==="=" ? a!==b : a===b;
+
+      if(broken){
+        addIfWrong(rel.r1,rel.c1);
+        addIfWrong(rel.r2,rel.c2);
+      }
+    });
+
+    return involved;
   }
 
   function pruneCages(){
-    Array.from(caged).forEach(function(k){
-      const parts=k.split("-").map(Number);
-      const r=parts[0],c=parts[1];
+    const currentCulprits=visibleRuleCulprits();
 
-      if(!breaksVisibleRule(r,c)){
+    Array.from(caged).forEach(function(k){
+      if(!currentCulprits.has(k)){
         caged.delete(k);
       }
     });
@@ -866,13 +924,8 @@ h1{
     start();
 
     const k=key(r,c);
-    const existingTimer=errorTimers.get(k);
 
-    if(existingTimer){
-      clearTimeout(existingTimer);
-      errorTimers.delete(k);
-    }
-
+    clearErrorTimers();
     caged.delete(k);
 
     board[r][c]=
@@ -892,21 +945,22 @@ h1{
       return;
     }
 
-    if(breaksVisibleRule(r,c)){
+    if(visibleRuleCulprits().size){
       const id=setTimeout(function(){
-        errorTimers.delete(k);
+        errorTimers.delete("rule-check");
 
-        if(
-          !solved &&
-          breaksVisibleRule(r,c)
-        ){
-          caged.add(k);
+        if(solved) return;
+
+        const culprits=visibleRuleCulprits();
+
+        if(culprits.size){
+          caged=new Set(culprits);
           render();
           showCageWarning();
         }
-      },2000);
+      },1200);
 
-      errorTimers.set(k,id);
+      errorTimers.set("rule-check",id);
     }
   }
 
