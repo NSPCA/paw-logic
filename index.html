@@ -250,7 +250,7 @@ h1{
 }
 .message strong{color:var(--ink)}
 .instruction-message{
-  margin:0 auto 14px;
+  margin:0 auto 26px;
 }
 .feedback-message{
   display:none;
@@ -454,6 +454,7 @@ h1{
   .end-frame h2{font-size:23px}
   .end-frame p{font-size:16px}
   .donate-btn{min-width:88%}
+  .instruction-message{margin-bottom:22px}
   .buttons{margin-top:22px}
 }
 @media(prefers-reduced-motion:reduce){
@@ -958,7 +959,7 @@ h1{
           render();
           showCageWarning();
         }
-      },1200);
+      },1000);
 
       errorTimers.set("rule-check",id);
     }
