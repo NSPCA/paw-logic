@@ -237,6 +237,10 @@ h1{
 .cage:before{top:27%}
 .cage:after{bottom:27%}
 @keyframes cageDrop{to{transform:translateY(0)}}
+.cage.settled{
+  animation:none;
+  transform:translateY(0);
+}
 .message{
   max-width:520px;
   min-height:50px;
@@ -598,6 +602,7 @@ h1{
   let board=[];
   let fixed=new Set();
   let caged=new Set();
+  let freshCages=new Set();
   let errorTimers=new Map();
   let seconds=0;
   let timer=null;
@@ -684,6 +689,7 @@ h1{
     solved=false;
     seconds=0;
     caged=new Set();
+    freshCages=new Set();
     hintTarget=null;
 
     board=Array.from({length:N},function(){ return Array(N).fill(EMPTY); });
@@ -846,7 +852,9 @@ h1{
 
           button.innerHTML=
             icon(board[r][c])+
-            (caged.has(k) ? '<span class="cage" aria-hidden="true"></span>' : "");
+            (caged.has(k)
+              ? '<span class="cage'+(freshCages.has(k) ? '' : ' settled')+'" aria-hidden="true"></span>'
+              : "");
 
           button.setAttribute(
             "aria-label",
@@ -883,6 +891,8 @@ h1{
         }
       }
     }
+
+    freshCages.clear();
   }
 
   function giveHint(){
@@ -930,6 +940,7 @@ h1{
 
     clearErrorTimers();
     caged.delete(k);
+    freshCages.delete(k);
 
     board[r][c]=
       board[r][c]===EMPTY ? CAT :
@@ -957,7 +968,13 @@ h1{
         const culprits=visibleRuleCulprits();
 
         if(culprits.size){
-          caged=new Set(culprits);
+          const nextCages=new Set(culprits);
+          freshCages=new Set(
+            Array.from(nextCages).filter(function(cellKey){
+              return !caged.has(cellKey);
+            })
+          );
+          caged=nextCages;
           render();
           showCageWarning();
         }
